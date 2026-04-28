@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Reflection — Deep Thought</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d12;
+    --surface: #14141c;
+    --surface2: #1c1c28;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+    --accent: #7c6af7;
+    --accent2: #4fcfb0;
+    --warn: #f7a26a;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a1040 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 620px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .header .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .header .time {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .axis-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .axis-pip {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: var(--border);
+    transition: background 0.5s ease;
+  }
+
+  .axis-pip.active { background: var(--accent); }
+  .axis-pip.done { background: var(--accent2); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .node-type-badge {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .node-type-badge::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 32px;
+    white-space: pre-line;
+  }
+
+  .card-text em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover {
+    background: #22223a;
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    background: #1e1a40;
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .continue-btn {
+    margin-top: 28px;
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .continue-btn:hover {
+    background: #9485ff;
+    transform: translateY(-1px);
+  }
+
+  .continue-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .continue-btn.secondary:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .reflection-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-line;
+    border-left: 2px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 32px;
+  }
+
+  .summary-section {
+    margin-bottom: 28px;
+  }
+
+  .summary-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+
+  .summary-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    margin-bottom: 4px;
+    overflow: hidden;
+  }
+
+  .summary-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 1s ease;
+  }
+
+  .summary-body {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  .end-icon {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-out {
+    animation: fadeOut 0.3s ease forwards;
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-8px); }
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 24px; }
+    .card-text { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo">Deep Thought · Daily Reflection</div>
+    <div class="time" id="timeDisplay"></div>
+  </div>
+  <div class="axis-bar" id="axisBar">
+    <div class="axis-pip" id="pip1" title="Axis 1: Locus"></div>
+    <div class="axis-pip" id="pip2" title="Axis 2: Orientation"></div>
+    <div class="axis-pip" id="pip3" title="Axis 3: Radius"></div>
+  </div>
+  <div id="cardContainer"></div>
+  <div class="progress-text" id="progressText"></div>
+</div>
+
+<script>
+// ─── TREE DATA ────────────────────────────────────────────────────────────────
+const TREE = [
+  { id:"START", parentId:null, type:"start", text:"Good evening. You made it to the end of another day.\n\nThis is your space — no performance, no judgment. Just a quiet conversation with yourself.\n\nLet's see how today really went.", options:[], target:"A1_OPEN", signal:"" },
+  { id:"A1_OPEN", parentId:"START", type:"question", text:"If today were a weather report, what would it be?", options:["Sunny — things flowed","Cloudy — low energy, unclear","Stormy — rough and draining","Mixed — patches of both"], target:"", signal:"" },
+  { id:"A1_D1", parentId:"A1_OPEN", type:"decision", text:"", options:["answer=Sunny — things flowed|Mixed — patches of both:A1_Q_AGENCY_HIGH","answer=Cloudy — low energy, unclear|Stormy — rough and draining:A1_Q_AGENCY_LOW"], target:"", signal:"" },
+  { id:"A1_Q_AGENCY_HIGH", parentId:"A1_D1", type:"question", text:"You said \"{A1_OPEN.answer}\". When something went well today, what was the main reason?", options:["I had prepared for it","I adapted when it shifted","The timing was just right","Someone else made it happen"], target:"", signal:"axis1:internal" },
+  { id:"A1_Q_AGENCY_LOW", parentId:"A1_D1", type:"question", text:"You said \"{A1_OPEN.answer}\". When things got difficult, what did you find yourself doing?", options:["Looked for what I could still control","Waited for things to change on their own","Pushed through but felt alone in it","Got frustrated at circumstances or people"], target:"", signal:"axis1:external" },
+  { id:"A1_D2_HIGH", parentId:"A1_Q_AGENCY_HIGH", type:"decision", text:"", options:["answer=I had prepared for it|I adapted when it shifted:A1_Q_CHOICE_INT","answer=The timing was just right|Someone else made it happen:A1_Q_CHOICE_EXT"], target:"", signal:"" },
+  { id:"A1_D2_LOW", parentId:"A1_Q_AGENCY_LOW", type:"decision", text:"", options:["answer=Looked for what I could still control|Pushed through but felt alone in it:A1_Q_CHOICE_INT","answer=Waited for things to change on their own|Got frustrated at circumstances or people:A1_Q_CHOICE_EXT"], target:"", signal:"" },
+  { id:"A1_Q_CHOICE_INT", parentId:"A1_D2_HIGH", type:"question", text:"Think of one moment today where things didn't go as expected. What did you actually do?", options:["Changed my approach on the spot","Asked for input and adjusted","Held my ground and it worked out","Let it go and focused on what I could do"], target:"", signal:"axis1:internal" },
+  { id:"A1_Q_CHOICE_EXT", parentId:"A1_D2_LOW", type:"question", text:"Think of one moment today where things didn't go as expected. Looking back, was there a choice available to you — even a small one?", options:["Yes — I see it now, even if I didn't then","Maybe — it's hard to tell","Not really — the situation was out of my hands","I don't think it would have mattered"], target:"", signal:"axis1:external" },
+  { id:"A1_R_INT", parentId:"A1_D2_HIGH", type:"reflection", text:"You stayed in the driver's seat today — even when the road changed.\n\nThat's not luck. Noticing your own agency, and using it, is a practice. You did it today.", options:[], target:"BRIDGE_1_2", signal:"axis1:internal" },
+  { id:"A1_R_INT_SOFT", parentId:"A1_Q_CHOICE_EXT", type:"reflection", text:"Even if it wasn't clear in the moment — you can see now that a choice existed.\n\nThat gap between 'it happened to me' and 'I responded' — noticing it is where agency begins.", options:[], target:"BRIDGE_1_2", signal:"axis1:internal" },
+  { id:"A1_R_EXT", parentId:"A1_Q_CHOICE_EXT", type:"reflection", text:"Hard days pull focus outward — to what others did, what circumstances did, what didn't come through.\n\nFair enough. But somewhere in today, even quietly — you made a call. Let that sit for a moment.", options:[], target:"BRIDGE_1_2", signal:"axis1:external" },
+  { id:"BRIDGE_1_2", parentId:null, type:"bridge", text:"Now let's shift from how you handled today — to what you brought to it.", options:[], target:"A2_OPEN", signal:"" },
+  { id:"A2_OPEN", parentId:"BRIDGE_1_2", type:"question", text:"Think about your interactions today. Which of these feels most true?", options:["I was mostly giving — energy, help, attention","I was mostly receiving — support, direction, resources","It was balanced — give and take","I was transacting — doing my part, no more"], target:"", signal:"" },
+  { id:"A2_D1", parentId:"A2_OPEN", type:"decision", text:"", options:["answer=I was mostly giving — energy, help, attention|It was balanced — give and take:A2_Q_CONTRIB","answer=I was mostly receiving — support, direction, resources|I was transacting — doing my part, no more:A2_Q_ENTITLE"], target:"", signal:"" },
+  { id:"A2_Q_CONTRIB", parentId:"A2_D1", type:"question", text:"Can you think of something you did today that wasn't strictly required of you?", options:["Yes — I helped someone with something outside my scope","Yes — I flagged a problem I didn't have to flag","Sort of — I stayed longer or went deeper than expected","Not really — I focused on my own list"], target:"", signal:"axis2:contribution" },
+  { id:"A2_Q_ENTITLE", parentId:"A2_D1", type:"question", text:"At any point today, did you feel like your effort wasn't being seen or rewarded fairly?", options:["Yes — I felt underrecognized for what I put in","Yes — others got credit that I deserved","A little, but I let it go","No — I wasn't focused on that today"], target:"", signal:"axis2:entitlement" },
+  { id:"A2_D2_C", parentId:"A2_Q_CONTRIB", type:"decision", text:"", options:["answer=Yes — I helped someone with something outside my scope|Yes — I flagged a problem I didn't have to flag|Sort of — I stayed longer or went deeper than expected:A2_Q_MOTIVE","answer=Not really — I focused on my own list:A2_Q_OPPORTUNITY"], target:"", signal:"" },
+  { id:"A2_D2_E", parentId:"A2_Q_ENTITLE", type:"decision", text:"", options:["answer=Yes — I felt underrecognized for what I put in|Yes — others got credit that I deserved:A2_R_ENTITLE","answer=A little, but I let it go|No — I wasn't focused on that today:A2_Q_MOTIVE"], target:"", signal:"" },
+  { id:"A2_Q_MOTIVE", parentId:"A2_D2_C", type:"question", text:"When you gave that effort — what was underneath it?", options:["I genuinely wanted to help","It felt like the right thing to do","I hoped it would be noticed","Habit — I just do these things"], target:"", signal:"axis2:contribution" },
+  { id:"A2_Q_OPPORTUNITY", parentId:"A2_D2_C", type:"question", text:"Looking back at today — was there a moment where someone could have used a hand, and you didn't step in?", options:["Yes — I saw it but was too busy","Yes — I noticed but wasn't sure if it was my place","Maybe — I'm not certain","No — I don't think so"], target:"", signal:"axis2:entitlement" },
+  { id:"A2_R_CONTRIB", parentId:"A2_Q_MOTIVE", type:"reflection", text:"Giving without keeping score is rarer than it sounds.\n\nWhat you brought today — the help, the care, the extra effort — that's the kind of thing that doesn't show up in any metric. But it shapes everything.", options:[], target:"BRIDGE_2_3", signal:"axis2:contribution" },
+  { id:"A2_R_ENTITLE", parentId:"A2_D2_E", type:"reflection", text:"Wanting recognition isn't weakness — it's human.\n\nBut here's the question worth sitting with: when you focus on what you deserve, does it make you give more — or less? That shift, from receiving to giving, is where energy comes from.", options:[], target:"BRIDGE_2_3", signal:"axis2:entitlement" },
+  { id:"A2_R_MISSED", parentId:"A2_Q_OPPORTUNITY", type:"reflection", text:"Not every opportunity to give will be taken. That's fine.\n\nJust noticing the ones you passed — without guilt — is the beginning of a different kind of day tomorrow.", options:[], target:"BRIDGE_2_3", signal:"axis2:entitlement" },
+  { id:"BRIDGE_2_3", parentId:null, type:"bridge", text:"You've looked at how you responded today, and what you gave.\n\nNow — let's zoom out. Who else was in today?", options:[], target:"A3_OPEN", signal:"" },
+  { id:"A3_OPEN", parentId:"BRIDGE_2_3", type:"question", text:"When you think about today's biggest challenge — whose experience comes to mind first?", options:["Mine — it was mine to carry","My team's — we were all in it","A specific colleague who had it harder","The people we're ultimately here to serve"], target:"", signal:"" },
+  { id:"A3_D1", parentId:"A3_OPEN", type:"decision", text:"", options:["answer=Mine — it was mine to carry:A3_Q_SELF","answer=My team's — we were all in it|A specific colleague who had it harder:A3_Q_OTHER","answer=The people we're ultimately here to serve:A3_Q_WIDE"], target:"", signal:"" },
+  { id:"A3_Q_SELF", parentId:"A3_D1", type:"question", text:"That makes sense — it was your day, your challenge. Did anyone else's experience cross your mind at any point?", options:["Yes — I thought about how it affected someone on my team","Briefly — but I was too absorbed in my own situation","Not really — I was heads down","I'm not sure"], target:"", signal:"axis3:self" },
+  { id:"A3_Q_OTHER", parentId:"A3_D1", type:"question", text:"You thought about \"{A3_OPEN.answer}\". Did that awareness change how you acted?", options:["Yes — I checked in or offered help","Yes — I adjusted my own approach because of it","I noticed, but didn't act on it","Not consciously — it just shifted my mood"], target:"", signal:"axis3:other" },
+  { id:"A3_Q_WIDE", parentId:"A3_D1", type:"question", text:"Thinking about the end user or the larger purpose — did that shift something for you today?", options:["Yes — it reminded me why the work matters","Yes — it made a frustrating task feel meaningful","I thought about it but it felt abstract","Not today — I was too close to the day-to-day"], target:"", signal:"axis3:transcendent" },
+  { id:"A3_D2_SELF", parentId:"A3_Q_SELF", type:"decision", text:"", options:["answer=Yes — I thought about how it affected someone on my team:A3_R_EXPAND","answer=Briefly — but I was too absorbed in my own situation|Not really — I was heads down|I'm not sure:A3_R_SELF"], target:"", signal:"" },
+  { id:"A3_D2_OTHER", parentId:"A3_Q_OTHER", type:"decision", text:"", options:["answer=Yes — I checked in or offered help|Yes — I adjusted my own approach because of it:A3_R_OTHER","answer=I noticed, but didn't act on it|Not consciously — it just shifted my mood:A3_R_EXPAND"], target:"", signal:"" },
+  { id:"A3_D2_WIDE", parentId:"A3_Q_WIDE", type:"decision", text:"", options:["answer=Yes — it reminded me why the work matters|Yes — it made a frustrating task feel meaningful:A3_R_TRANSCEND","answer=I thought about it but it felt abstract|Not today — I was too close to the day-to-day:A3_R_EXPAND"], target:"", signal:"" },
+  { id:"A3_R_SELF", parentId:"A3_D2_SELF", type:"reflection", text:"Being absorbed in your own experience isn't selfishness — sometimes the problem demands all of you.\n\nBut here's something worth noticing: the days that feel most draining are often the most self-contained ones. Meaning tends to live at the edge where your world meets someone else's.", options:[], target:"SUMMARY", signal:"axis3:self" },
+  { id:"A3_R_EXPAND", parentId:"A3_D2_SELF", type:"reflection", text:"You caught a glimpse of someone else's day inside your own.\n\nThat small act of looking outward — even briefly — is what keeps work from becoming a closed loop. You didn't just survive your day. You were present in someone else's.", options:[], target:"SUMMARY", signal:"axis3:other" },
+  { id:"A3_R_OTHER", parentId:"A3_D2_OTHER", type:"reflection", text:"You saw someone else clearly today — and that changed what you did.\n\nThat's perspective-taking in action. Not as a concept, but as a behaviour. The team feels it, even when no one says anything.", options:[], target:"SUMMARY", signal:"axis3:other" },
+  { id:"A3_R_TRANSCEND", parentId:"A3_D2_WIDE", type:"reflection", text:"You touched the largest frame today — the person at the end of all this work.\n\nMaslow called this self-transcendence: the shift from 'what do I need?' to 'what does the world need from me?' It's not abstract. Today, you felt it.", options:[], target:"SUMMARY", signal:"axis3:transcendent" },
+  { id:"SUMMARY", parentId:null, type:"summary", text:"", options:["I want to carry more agency tomorrow","I want to give more than I take","I want to widen my circle of awareness","I'll hold what today showed me"], target:"END", signal:"" },
+  { id:"END", parentId:"SUMMARY", type:"end", text:"Good. That's enough for tonight.\n\nRest well. Tomorrow is another chance.", options:[], target:"", signal:"" }
+];
+
+// ─── ENGINE ───────────────────────────────────────────────────────────────────
+const nodeMap = {};
+TREE.forEach(n => nodeMap[n.id] = n);
+
+let state = {
+  answers: {},        // nodeId → selected answer
+  signals: {
+    axis1: { internal: 0, external: 0 },
+    axis2: { contribution: 0, entitlement: 0 },
+    axis3: { self: 0, other: 0, transcendent: 0 }
+  },
+  path: [],
+  currentId: "START"
+};
+
+function interpolate(text) {
+  return text.replace(/\{([^}]+)\}/g, (match, key) => {
+    const [nodeId, prop] = key.split('.');
+    if (prop === 'answer') return state.answers[nodeId] || match;
+    return match;
+  });
+}
+
+function applySignal(signal) {
+  if (!signal) return;
+  const [axis, pole] = signal.split(':');
+  if (state.signals[axis] && pole in state.signals[axis]) {
+    state.signals[axis][pole]++;
+  }
+}
+
+function getDominant(axis) {
+  const s = state.signals[axis];
+  if (!s) return 'balanced';
+  const entries = Object.entries(s).sort((a,b) => b[1] - a[1]);
+  if (entries[0][1] === 0) return 'balanced';
+  if (entries.length > 1 && entries[0][1] === entries[1][1]) return 'balanced';
+  return entries[0][0];
+}
+
+function resolveDecision(node) {
+  for (const rule of node.options) {
+    const [condition, target] = rule.split(':');
+    const [key, ...vals] = condition.split('=');
+    if (key === 'answer') {
+      const allowed = vals.join('=').split('|');
+      // find the answer from the parent of this decision node
+      const parentAnswer = state.answers[node.parentId];
+      if (allowed.includes(parentAnswer)) return target;
+    }
+  }
+  return null;
+}
+
+function getNextId(currentNode, selectedAnswer) {
+  if (currentNode.target) return currentNode.target;
+
+  // find children
+  const children = TREE.filter(n => n.parentId === currentNode.id);
+
+  // if there's a decision child, resolve it
+  const dec = children.find(n => n.type === 'decision');
+  if (dec) {
+    state.answers[dec.id] = selectedAnswer;
+    return resolveDecision(dec);
+  }
+
+  if (children.length === 1) return children[0].id;
+  if (children.length > 1) {
+    // pick by matching answer
+    const match = children.find(n => {
+      const allowed = (n.options || []).join('|');
+      return allowed.includes(selectedAnswer);
+    });
+    return match ? match.id : children[0].id;
+  }
+
+  return null;
+}
+
+// ─── UI ───────────────────────────────────────────────────────────────────────
+function getAxisForNode(id) {
+  if (!id) return 0;
+  if (id.startsWith('A1') || id === 'START') return 1;
+  if (id.startsWith('A2') || id === 'BRIDGE_1_2') return 2;
+  if (id.startsWith('A3') || id === 'BRIDGE_2_3') return 3;
+  if (id === 'SUMMARY' || id === 'END') return 4;
+  return 0;
+}
+
+function updateAxisBar(nodeId) {
+  const axis = getAxisForNode(nodeId);
+  ['pip1','pip2','pip3'].forEach((pid, i) => {
+    const el = document.getElementById(pid);
+    const a = i + 1;
+    el.className = 'axis-pip';
+    if (a < axis) el.classList.add('done');
+    else if (a === axis) el.classList.add('active');
+  });
+}
+
+function updateTime() {
+  const now = new Date();
+  document.getElementById('timeDisplay').textContent =
+    now.toLocaleDateString('en-IN', { weekday:'long', month:'long', day:'numeric' }) +
+    ' · ' + now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+
+function buildSummaryHTML() {
+  const a1d = getDominant('axis1');
+  const a2d = getDominant('axis2');
+  const a3d = getDominant('axis3');
+
+  const a1Labels = { internal: 'internal — you saw your hand in what happened', external: 'external — today felt like it happened to you more than through you', balanced: 'balanced between agency and circumstance' };
+  const a2Labels = { contribution: 'contribution — you gave without keeping score', entitlement: 'receiving — you were focused on what you deserved', balanced: 'balanced between giving and receiving' };
+  const a3Labels = { self: 'self-focused — you were carrying your own weight', other: 'other-focused — you saw someone else clearly', transcendent: 'transcendent — you touched the largest frame today', balanced: 'present to the world around you' };
+
+  const a1pct = state.signals.axis1.internal / Math.max(1, state.signals.axis1.internal + state.signals.axis1.external) * 100;
+  const a2pct = state.signals.axis2.contribution / Math.max(1, state.signals.axis2.contribution + state.signals.axis2.entitlement) * 100;
+  const a3tot = Object.values(state.signals.axis3).reduce((a,b)=>a+b,0);
+  const a3pct = a3tot > 0 ? (state.signals.axis3.other + state.signals.axis3.transcendent) / a3tot * 100 : 50;
+
+  return `
+    <div class="node-type-badge">Today's reflection</div>
+    <div class="summary-section">
+      <div class="summary-label">Axis 1 · Locus</div>
+      <div class="summary-bar"><div class="summary-fill" style="width:${a1pct}%"></div></div>
+      <div class="summary-body">You leaned <strong>${a1Labels[a1d] || a1d}</strong>.</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Axis 2 · Orientation</div>
+      <div class="summary-bar"><div class="summary-fill" style="width:${a2pct}%"></div></div>
+      <div class="summary-body">You leaned <strong>${a2Labels[a2d] || a2d}</strong>.</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Axis 3 · Radius</div>
+      <div class="summary-bar"><div class="summary-fill" style="width:${a3pct}%"></div></div>
+      <div class="summary-body">Your awareness was <strong>${a3Labels[a3d] || a3d}</strong>.</div>
+    </div>
+    <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border)">
+      <div class="summary-label">One intention for tomorrow</div>
+  `;
+}
+
+function renderNode(nodeId) {
+  const node = nodeMap[nodeId];
+  if (!node) return;
+
+  state.currentId = nodeId;
+  state.path.push(nodeId);
+  applySignal(node.signal);
+  updateAxisBar(nodeId);
+
+  const container = document.getElementById('cardContainer');
+
+  // fade out existing
+  if (container.firstChild) {
+    container.firstChild.classList.add('fade-out');
+    setTimeout(() => {
+      container.innerHTML = '';
+      drawNode(node, container);
+    }, 300);
+  } else {
+    drawNode(node, container);
+  }
+}
+
+function drawNode(node, container) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  if (node.type === 'start') {
+    card.innerHTML = `
+      <div class="node-type-badge">Evening check-in</div>
+      <div class="card-text">${interpolate(node.text)}</div>
+      <button class="continue-btn" onclick="advance(null)">Begin →</button>
+    `;
+  }
+  else if (node.type === 'question') {
+    const opts = node.options.map((o,i) => `
+      <button class="option-btn" onclick="selectOption(this,'${o.replace(/'/g,"\\'")}','${node.id}')">${o}</button>
+    `).join('');
+    card.innerHTML = `
+      <div class="node-type-badge">${getAxisLabel(node.id)}</div>
+      <div class="card-text">${interpolate(node.text)}</div>
+      <div class="options">${opts}</div>
+    `;
+  }
+  else if (node.type === 'reflection') {
+    card.innerHTML = `
+      <div class="node-type-badge">Reflection</div>
+      <div class="reflection-text">${interpolate(node.text)}</div>
+      <button class="continue-btn secondary" onclick="advance(null)">Continue →</button>
+    `;
+  }
+  else if (node.type === 'bridge') {
+    card.innerHTML = `
+      <div class="node-type-badge">Transitioning</div>
+      <div class="card-text" style="font-size:18px;color:var(--muted)">${interpolate(node.text)}</div>
+    `;
+    setTimeout(() => advance(null), 2200);
+  }
+  else if (node.type === 'summary') {
+    const opts = node.options.map(o => `
+      <button class="option-btn" onclick="selectOption(this,'${o.replace(/'/g,"\\'")}','${node.id}')">${o}</button>
+    `).join('');
+    card.innerHTML = buildSummaryHTML() + `<div class="options">${opts}</div></div>`;
+  }
+  else if (node.type === 'end') {
+    card.innerHTML = `
+      <div class="end-icon">🌙</div>
+      <div class="card-text" style="text-align:center">${interpolate(node.text)}</div>
+      <button class="continue-btn secondary" style="margin-top:32px" onclick="resetSession()">Start a new session</button>
+    `;
+    ['pip1','pip2','pip3'].forEach(id => {
+      document.getElementById(id).className = 'axis-pip done';
+    });
+  }
+
+  container.appendChild(card);
+  updateProgress();
+}
+
+function getAxisLabel(nodeId) {
+  if (nodeId.startsWith('A1')) return 'Axis 1 · Locus of Control';
+  if (nodeId.startsWith('A2')) return 'Axis 2 · Orientation';
+  if (nodeId.startsWith('A3')) return 'Axis 3 · Radius';
+  return 'Question';
+}
+
+function selectOption(btn, answer, nodeId) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.answers[nodeId] = answer;
+  setTimeout(() => advance(answer), 400);
+}
+
+function advance(answer) {
+  const current = nodeMap[state.currentId];
+  const nextId = getNextId(current, answer);
+  if (nextId) {
+    // skip decision nodes
+    const next = nodeMap[nextId];
+    if (next && next.type === 'decision') {
+      state.answers[nextId] = answer;
+      const resolved = resolveDecision(next);
+      if (resolved) renderNode(resolved);
+    } else {
+      renderNode(nextId);
+    }
+  }
+}
+
+function updateProgress() {
+  const total = TREE.filter(n => n.type === 'question').length;
+  const done = state.path.filter(id => nodeMap[id] && nodeMap[id].type === 'question').length;
+  const el = document.getElementById('progressText');
+  if (done > 0 && done < total) {
+    el.textContent = `${done} of ${total} questions`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function resetSession() {
+  state = { answers:{}, signals:{ axis1:{internal:0,external:0}, axis2:{contribution:0,entitlement:0}, axis3:{self:0,other:0,transcendent:0} }, path:[], currentId:"START" };
+  renderNode('START');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+updateTime();
+setInterval(updateTime, 60000);
+renderNode('START');
+</script>
+</body>
+</html>
